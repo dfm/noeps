@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+http://arxiv.org/pdf/1412.6980v8.pdf
+
+"""
+
 from __future__ import division, print_function
 
 import theano

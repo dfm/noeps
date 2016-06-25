@@ -84,5 +84,5 @@ for i in range(1000):
     vals.append(func(x_data[inds], theta_data[inds]))
 
 import matplotlib.pyplot as pl
-pl.plot(vals[-100:])
+pl.plot(vals)
 pl.savefig("vals.png")
