@@ -26,8 +26,18 @@ print(nu, nout)
 
 
 x_data = np.random.rand(nsamp, nin)
-# theta_data = np.atleast_2d(np.dot(x_data, np.array([0.5, -0.1]))).T
-theta_data = np.random.randn(nsamp, nout)
+theta_data = np.atleast_2d(np.dot(x_data, np.array([0.5, -0.1]))).T
+# x = []
+# ind = 0
+# while True:
+#     n = np.random.randint(2000)
+#     ind += n
+#     x.append(np.random.randn()+0.1*np.random.rand()*np.random.randn(n, nout))
+#     if ind >= nsamp:
+#         break
+# theta_data = np.concatenate(x)
+# print(theta_data.shape)
+# theta_data = np.random.randn(nsamp, nout)
 # theta_data += 1e-3*np.random.randn(*(theta_data.shape))
 
 # In/out:
@@ -69,8 +79,8 @@ lnprob, _ = theano.reduce(apply_gaussian, [Uvals, mkvals, alpha, theta],
 cost = -lnprob
 params = [W, b, W_alpha, b_alpha, W_mk, b_mk, W_u, b_u]
 
-for p in params:
-    cost += 0.1 * T.sum(p**2)
+# for p in params:
+#     cost += 0.1 * T.sum(p**2)
 
 grads = T.grad(cost, params)
 
