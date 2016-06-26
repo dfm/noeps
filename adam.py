@@ -17,16 +17,15 @@ def get_adam_updates(cost, params,
     grads = T.grad(cost, params)
     t = theano.shared(1.0)
     updates = [(t, t + 1.0)]
+    alpha_t = alpha * T.sqrt(1.0 - beta2**t) / (1.0 - beta1**t)
 
     for p, g in zip(params, grads):
         m = theano.shared(p.get_value() * 0.0)
         v = theano.shared(p.get_value() * 0.0)
 
         m_t = beta1 * m + (1.0 - beta1) * g
-        m_hat = m_t / (1.0 - beta1**t)
         v_t = beta2 * v + (1.0 - beta2) * g**2
-        v_hat = v_t / (1.0 - beta2**t)
-        p_t = p - alpha * m_hat / (T.sqrt(v_hat) + eps)
+        p_t = p - alpha_t * m_t / (T.sqrt(v_t) + eps)
 
         updates += [(p, p_t), (m, m_t), (v, v_t)]
 

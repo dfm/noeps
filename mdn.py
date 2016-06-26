@@ -13,18 +13,22 @@ from adam import get_adam_updates
 
 __all__ = []
 
+batch_size = 64
+batch_offset = T.lscalar()
 
-nsamp = 10000
-nin = 8
-nhidden = 5
+nsamp = batch_size * 5000
+nin = 2
+nhidden = 2
 ngauss = 2
-nout = 5
+nout = 1
 nu = (nout * (nout + 1)) // 2
 print(nu, nout)
 
+
 x_data = np.random.rand(nsamp, nin)
-theta_data = np.dot(x_data, np.random.randn(nin, nout))
-theta_data += 0.1*np.random.randn(*(theta_data.shape))
+# theta_data = np.atleast_2d(np.dot(x_data, np.array([0.5, -0.1]))).T
+theta_data = np.random.randn(nsamp, nout)
+# theta_data += 1e-3*np.random.randn(*(theta_data.shape))
 
 # In/out:
 x = T.dmatrix("x")
@@ -63,15 +67,18 @@ outputs_info = T.as_tensor_variable(np.asarray(0.0, float))
 lnprob, _ = theano.reduce(apply_gaussian, [Uvals, mkvals, alpha, theta],
                           outputs_info)
 cost = -lnprob
-
 params = [W, b, W_alpha, b_alpha, W_mk, b_mk, W_u, b_u]
+
+for p in params:
+    cost += 0.1 * T.sum(p**2)
+
 grads = T.grad(cost, params)
 
-rate = 1e-15
 updates = get_adam_updates(cost, params)
 
 strt = time.time()
-func = theano.function([x, theta], outputs=cost, updates=updates)
+update_step = theano.function([x, theta], outputs=cost, updates=updates)
+cost_func = theano.function([x, theta], outputs=cost)
 print(time.time() - strt)
 
 # strt = time.time()
@@ -79,9 +86,14 @@ print(time.time() - strt)
 # print(time.time() - strt)
 
 vals = []
+ind = 0
 for i in range(1000):
-    inds = np.random.randint(nsamp, size=100)
-    vals.append(func(x_data[inds], theta_data[inds]))
+    if (i + 1) % 50 == 0:
+        print(i, 0.9**i, cost_func(x_data, theta_data))
+    inds = np.random.randint(nsamp, size=batch_size)
+    vals.append(update_step(x_data    [inds],
+                            theta_data[inds]))
+    ind = (ind + batch_size) % len(x_data)
 
 import matplotlib.pyplot as pl
 pl.plot(vals)
